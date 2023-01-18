@@ -8,48 +8,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const drawerHeader = UserAccountsDrawerHeader(
-      accountName: Text('Sagar'),
-      accountEmail: Text('Sagar@123.com'),
-      currentAccountPicture: CircleAvatar(
-        backgroundColor: Colors.white,
-        child: FlutterLogo(
-          size: 42.0,
-        ),
-      ),
-    );
-    final drawerItems = ListView(
-      children: <Widget>[
-        drawerHeader,
-        ListTile(
-          title: const Text('NAME'),
-          onTap: () {},
-        ),
-        ListTile(
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.arrow_back_rounded),
-              Text('  Go Back'),
-            ],
-          ),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.exit_to_app),
-              Text('  Exit'),
-            ],
-          ),
-          onTap: () => exit(0),
-        )
-      ],
-    );
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
@@ -69,9 +27,106 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+
+const drawerHeader = UserAccountsDrawerHeader(
+  accountName: Text('Sagar'),
+  accountEmail: Text('Sagar@123.com'),
+  currentAccountPicture: CircleAvatar(
+    backgroundColor: Colors.white,
+    child: FlutterLogo(
+      size: 42.0,
+    ),
+  ),
+);
+final drawerItems = ListView(
+  children: <Widget>[
+    drawerHeader,
+    ListTile(
+      title: Row(
+        children: const [
+          Icon(Icons.short_text),
+          Text('  NAME'),
+        ],
+      ),
+      onTap: () {},
+    ),
+    ListTile(
+      title: Row(
+        children: const [
+          Icon(Icons.mail),
+          Text('  EMAIL'),
+        ],
+      ),
+      onTap: () {},
+    ),
+    ListTile(
+      title: Row(
+        children: const [
+          Icon(Icons.call),
+          Text('  CONTACT'),
+        ],
+      ),
+      onTap: () {},
+    ),
+    ListTile(
+      title: Row(
+        children: const [
+          Icon(Icons.home_work_outlined),
+          Text('  CITY'),
+        ],
+      ),
+      onTap: () {},
+    ),
+    ListTile(
+      title: Row(
+        children: const [
+          Icon(Icons.maps_home_work),
+          Text('  ADDRESS'),
+        ],
+      ),
+      onTap: () {},
+    ),
+    ListTile(
+      title: Row(
+        children: const [
+          Icon(Icons.password),
+          Text('  PASSWORD'),
+        ],
+      ),
+      onTap: () {},
+    ),
+    ListTile(
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.arrow_back_rounded),
+          Text('  Go Back'),
+        ],
+      ),
+      onTap: () {
+
+      },
+    ),
+    ListTile(
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.exit_to_app),
+          Text('  Exit'),
+        ],
+      ),
+      onTap: () => exit(0),
+    )
+  ],
+);
+
+
 TextEditingController _textFieldName = TextEditingController();
 TextEditingController _textFieldContact = TextEditingController();
 TextEditingController _textFieldAddress = TextEditingController();
+
+bool _validate = false;
+
 Future<void> _showDialog(BuildContext context) async {
   // flutter defined function
   showDialog(
@@ -112,9 +167,7 @@ Future<void> _showDialog(BuildContext context) async {
             child: const Text('CANCEL'),
           ),
           ElevatedButton(
-            onPressed: () {
-
-            },
+            onPressed: () {},
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.green),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:logreg/register.dart';
 import 'package:logreg/home.dart';
 
@@ -31,17 +32,23 @@ class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class PersonData {
-  String email = '';
-  String password = '';
+  _MyStatefulWidgetState createState() {
+    return new _MyStatefulWidgetState();
+  }
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool _validateEmail = false;
+  bool _validatePassword = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +69,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           Container(
             padding: const EdgeInsets.all(10),
             child: TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Email'),
+              controller: emailController,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: 'Email',
+                errorText: _validateEmail ? 'Enter email & in proper format!' : null,
+              ),
             ),
           ),
           Container(
@@ -72,9 +82,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             child: TextField(
               obscureText: true,
               controller: passwordController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
                 labelText: 'Password',
+                errorText:
+                    _validatePassword ? 'Password cannot be empty' : null,
               ),
             ),
           ),
@@ -89,12 +101,31 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               padding: const EdgeInsets.fromLTRB(10, 15, 10, 0),
               child: ElevatedButton(
                 child: const Text(
-                    'LOGIN',
+                  'LOGIN',
                   style: TextStyle(fontSize: 20),
                 ),
-                onPressed: () {},
-              )
-          ),
+                onPressed: () {
+                  if (emailController.text.isEmpty ||
+                      !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(emailController.text)) {
+                    setState(() {
+                      _validateEmail = true;
+                    });
+                  } else {
+                    setState(() {
+                      _validateEmail = false;
+                    });
+                  }
+                  setState(() {
+                    // emailController.text.isEmpty
+                    //     ? _validateEmail = true
+                    //     : _validateEmail = false;
+                    passwordController.text.isEmpty
+                        ? _validatePassword = true
+                        : _validatePassword = false;
+                  });
+                },
+              )),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[

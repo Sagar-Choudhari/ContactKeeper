@@ -12,6 +12,7 @@ class DatabaseHelper {
   static const columnId = 'id';
   static const columnName = 'name';
   static const columnEmail = 'email';
+  static const columnContact = 'contact';
   static const columnCity = 'city';
   static const columnAddress = 'address';
   static const columnPassword = 'password';
@@ -46,6 +47,7 @@ class DatabaseHelper {
             $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
             $columnName TEXT NOT NULL,
             $columnEmail TEXT NOT NULL,
+            $columnContact TEXT NOT NULL,
             $columnCity TEXT NOT NULL,
             $columnAddress TEXT NOT NULL,
             $columnPassword TEXT NOT NULL
@@ -61,7 +63,7 @@ class DatabaseHelper {
 
   Future<int> insert(Users users) async {
     Database db = await instance.database;
-    return await db.insert(table, {'name': users.name, 'email': users.email, 'city': users.city, 'address': users.address, 'password': users.password});
+    return await db.insert(table, {'name': users.name, 'email': users.email, 'contcat': users.contact, 'city': users.city, 'address': users.address, 'password': users.password});
   }
 
   // All of the rows are returned as a list of maps, where each map is
