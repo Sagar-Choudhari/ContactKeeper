@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:logreg/dbhelper.dart';
 import 'package:logreg/register.dart';
 import 'package:logreg/home.dart';
 
@@ -85,8 +85,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 labelText: 'Password',
-                errorText:
-                    _validatePassword ? 'Password cannot be empty' : null,
+                errorText: _validatePassword ? 'Password cannot be empty' : null,
               ),
             ),
           ),
@@ -151,7 +150,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             ),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const HomePage(title: 'HomePage');
+                return HomePage(title: 'HomePage');
               }));
             },
           )

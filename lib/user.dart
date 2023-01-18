@@ -1,17 +1,17 @@
 import 'package:logreg/dbhelper.dart';
 
-class Users {
-  late int id;
-  late String name;
-  late String email;
-  late String contact;
-  late String city;
-  late String address;
-  late String password;
+class User {
+  int? id;
+  String? name;
+  String? email;
+  String? contact;
+  String? city;
+  String? address;
+  String? password;
 
-  Users(this.id, this.name, this.email, this.contact, this.city, this.address, this.password);
+  User(this.id, this.name, this.email, this.contact, this.city, this.address, this.password);
 
-  Users.fromMap(Map<String, dynamic> map) {
+  User.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     name = map['name'];
     email = map['email'];

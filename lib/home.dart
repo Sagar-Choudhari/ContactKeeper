@@ -1,9 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:logreg/user.dart';
+import 'package:logreg/dbhelper.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
+  HomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -103,9 +104,7 @@ final drawerItems = ListView(
           Text('  Go Back'),
         ],
       ),
-      onTap: () {
-
-      },
+      onTap: () {},
     ),
     ListTile(
       title: Row(
@@ -119,7 +118,6 @@ final drawerItems = ListView(
     )
   ],
 );
-
 
 TextEditingController _textFieldName = TextEditingController();
 TextEditingController _textFieldContact = TextEditingController();
@@ -187,6 +185,9 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
+  final dbHelper = DatabaseHelper.instance;
+  final List<User> users = [];
+
   @override
   Widget build(BuildContext context) {
     const numItems = 20;
@@ -197,22 +198,66 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: Text('$index'),
         ),
         title: Text(
-          'Text $index',
+          '[${users[index].id}] ${users[index].name} - ${users[index].email} - ${users[index].contact} - ${users[index].address}',
+          style: TextStyle(fontSize: 18),
         ),
-        trailing: const Icon(Icons.dashboard_customize_outlined),
+        trailing: IconButton(
+            onPressed: () {
+              setState(() {
+                _delete(users[index].id);
+                _getData();
+              });
+            },
+            icon: const Icon(
+              Icons.delete_forever,
+              color: Colors.red,
+              size: 26,
+            )
+        ),
+        selected: true,
+        onTap: () {
+          setState(() {
+            print('item tapped');
+          });
+          },
       );
     }
 
     // Widget _listView(){
-    return ListView.builder(
-      itemCount: numItems * 2,
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (BuildContext context, int i) {
-        if (i.isOdd) return const Divider();
-        final index = i ~/ 2 + 1;
+    return ListView.separated(
+      padding: const EdgeInsets.all(8),
+      itemCount: users.length + 1,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == users.length) {
+          return ElevatedButton(
+            child: const Text('Refresh'),
+            onPressed: () {
+              setState(() {
+                _getData();
+              });
+            },
+          );
+        }
         return buildRow(index);
-      },
+      }, separatorBuilder: (BuildContext context, int index) {
+      return const Divider();
+    },
     );
     // }
+  }
+
+  void _getData() async {
+    final allRows = await dbHelper.queryAllRows();
+    users.clear();
+    allRows.forEach((row) => users.add(User.fromMap(row)));
+    // _showMessageInScaffold('Query done.');
+    setState(() {});
+  }
+
+  void _delete(id) async {
+    Text('$id deleted');
+    await dbHelper.delete(id);
+    // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
+
   }
 }

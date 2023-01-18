@@ -1,4 +1,4 @@
-import 'package:logreg/users.dart';
+import 'package:logreg/user.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -23,14 +23,18 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static late Database _database;
-  Future<Database> get database async {
-    if (_database != null) return _database;
+  static Database? _database;
+  // Future<Database> get database async {
+  //   if (_database != null) return _database;
+  //
+  //   // lazily instantiate the db the first time it is accessed
+  //   _database = await _initDatabase();
+  //   return _database;
+  // }
 
-    // lazily instantiate the db the first time it is accessed
-    _database = await _initDatabase();
-    return _database;
-  }
+  Future<Database> get database async {
+    return _database ??= await _initDatabase();
+}
 
   // this opens the database (and creates it if it doesn't exist)
   _initDatabase() async{
@@ -61,18 +65,28 @@ class DatabaseHelper {
   // and the value is the column value. The return value is the id of the
   // inserted row.
 
-  Future<int> insert(Users users) async {
+  Future<int> insert(User users) async {
     Database db = await instance.database;
-    return await db.insert(table, {'name': users.name, 'email': users.email, 'contcat': users.contact, 'city': users.city, 'address': users.address, 'password': users.password});
+    return await db.insert(table, {'name': users.name, 'email': users.email, 'contact': users.contact, 'city': users.city, 'address': users.address, 'password': users.password});
   }
 
   // All of the rows are returned as a list of maps, where each map is
   // a key-value list of columns.
 
-  Future<List<Map<String, dynamic>>> queryRows(email) async {
+  Future<List<Map<String, dynamic>>> queryAllRows() async {
+    Database db = await instance.database;
+    return await db.query(table);
+  }
+
+  // Queries rows based on the argument received
+
+
+  Future<List<Map<String, dynamic>>> login(email) async {
     Database db = await instance.database;
     return await db.query(table, where: "$columnEmail LIKE '%$email%'");
   }
+
+
   // All of the methods (insert, query, update, delete) can also be done using
   // raw SQL commands. This method uses a raw query to give the row count.
   Future<int?> queryRowCount() async {
@@ -82,7 +96,7 @@ class DatabaseHelper {
 
   // We are assuming here that the id column in the map is set. The other
   // column values will be used to update the row.
-  Future<int> update(Users users) async {
+  Future<int> update(User users) async {
     Database db = await instance.database;
     int id = users.toMap()['id'];
     return await db.update(table, users.toMap(), where: '$columnId = ?', whereArgs: [id]);

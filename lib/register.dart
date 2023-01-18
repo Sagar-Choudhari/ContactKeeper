@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:logreg/dbhelper.dart';
+import 'package:logreg/user.dart';
 
 import 'main.dart';
 
@@ -27,6 +29,12 @@ class registerPageWidget extends StatefulWidget {
 }
 
 class _RegisterPageWidgetState extends State<registerPageWidget> {
+
+  final dbHelper = DatabaseHelper.instance;
+
+  final List<User> users = [];
+
+  //controllers used in insert operation UI
   final TextEditingController _ipName = TextEditingController();
   final TextEditingController _ipEmail = TextEditingController();
   final TextEditingController _ipContact = TextEditingController();
@@ -52,6 +60,16 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
     _ipAddress.dispose();
     _ipPassword.dispose();
     super.dispose();
+  }
+
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = new GlobalKey<ScaffoldMessengerState>();
+
+  void _showMessageInScaffold(String message){
+    _scaffoldKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+      )
+    );
   }
 
   @override
@@ -137,9 +155,7 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'Password',
                         hintText: 'Enter Password',
-                        errorText: _passwordValidate
-                            ? 'Password cannot be empty'
-                            : null,
+                        errorText: _passwordValidate ? 'Password cannot be empty' : null,
                       ),
                     ),
                   ),
@@ -152,9 +168,7 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'Confirm Password',
                         hintText: 'Enter Password Again',
-                        errorText: _password2Validate
-                            ? 'Password cannot be empty'
-                            : null,
+                        errorText: _password2Validate ? 'Password cannot be empty' : null,
                       ),
                     ),
                   ),
@@ -165,48 +179,48 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                       minWidth: 343.0,
                       color: Theme.of(context).primaryColor,
                       textColor: Colors.white,
-                      onPressed: () => {
+                      onPressed: () {
                         if (_ipName.text.isEmpty ||
                             !RegExp(r'^[a-z A-Z]+$').hasMatch(_ipName.text))
                           {
                             setState(() {
                               _nameValidate = true;
-                            })
+                            });
                           }
                         else
                           {
                             setState(() {
                               _nameValidate = false;
-                            })
-                          },
+                            });
+                          }
                         if (_ipEmail.text.isEmpty ||
                             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                                 .hasMatch(_ipEmail.text))
                           {
                             setState(() {
                               _emailValidate = true;
-                            })
+                            });
                           }
                         else
                           {
                             setState(() {
                               _emailValidate = false;
-                            })
-                          },
+                            });
+                          }
                         if (_ipContact.text.isEmpty ||
                             !RegExp(r'^(\+\d{1,3}[- ]?)?\d{10}$')
                                 .hasMatch(_ipContact.text))
                           {
                             setState(() {
                               _contactValidate = true;
-                            })
+                            });
                           }
                         else
                           {
                             setState(() {
                               _contactValidate = false;
-                            })
-                          },
+                            });
+                          }
                         setState(() {
                           _ipPassword.text.isEmpty
                               ? _passwordValidate = true
@@ -220,7 +234,14 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                           _ipAddress.text.isEmpty
                               ? _addressValidate = true
                               : _addressValidate = false;
-                        })
+                        });
+                        String name = _ipName.text;
+                        String email = _ipEmail.text;
+                        String contact = _ipContact.text;
+                        String city = _ipCity.text;
+                        String address = _ipAddress.text;
+                        String password = _ipPassword.text;
+                        _insert(name, email, contact, city, address, password);
                       },
                       splashColor: Colors.redAccent,
                       child: const Text(
@@ -248,8 +269,46 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                       )
                     ],
                   ),
+                  ElevatedButton(
+                      onPressed: (){
+                        setState(() {
+                          _getData();
+                        });
+                        print('getdata');
+                      },
+                      child:  const Text(
+                        'Get data',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                  )
                 ],
               )),
         ]));
   }
+
+  void _insert(name, email, contact, city, address, password) async {
+    // row to insert
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnName: name,
+      DatabaseHelper.columnEmail: email,
+      DatabaseHelper.columnContact: contact,
+      DatabaseHelper.columnCity: city,
+      DatabaseHelper.columnAddress: address,
+      DatabaseHelper.columnPassword: password,
+    };
+    User user = User.fromMap(row);
+    final id = await dbHelper.insert(user);
+    _showMessageInScaffold('inserted row id: $id');
+    print('inseted');
+  }
+
+  void _getData() async {
+    final allRows = await dbHelper.queryAllRows();
+    users.clear();
+    allRows.forEach((row) => users.add(User.fromMap(row)));
+    _showMessageInScaffold('Query done.');
+    setState(() {});
+  }
+
+
 }
