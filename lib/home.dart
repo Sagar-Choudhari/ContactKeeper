@@ -4,7 +4,7 @@ import 'package:logreg/user.dart';
 import 'package:logreg/dbhelper.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key, required this.title}) : super(key: key);
+  const HomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -199,7 +199,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         title: Text(
           '[${users[index].id}] ${users[index].name} - ${users[index].email} - ${users[index].contact} - ${users[index].address}',
-          style: TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18),
         ),
         trailing: IconButton(
             onPressed: () {

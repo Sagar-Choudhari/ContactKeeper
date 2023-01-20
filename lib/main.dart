@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:logreg/user.dart';
 import 'package:logreg/dbhelper.dart';
 import 'package:logreg/register.dart';
 import 'package:logreg/home.dart';
+import 'package:sqflite/sqflite.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,6 +13,7 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   static const String _title = 'LoggerAppVITPL';
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +43,14 @@ class MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool _validateEmail = false;
   bool _validatePassword = false;
+
+  final dbHelper = DatabaseHelper.instance;
+  final List<User> users = [];
+
+  // late var loggerDetail;
 
   @override
   void dispose() {
@@ -103,7 +112,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   'LOGIN',
                   style: TextStyle(fontSize: 20),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (emailController.text.isEmpty ||
                       !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                           .hasMatch(emailController.text)) {
@@ -116,13 +125,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     });
                   }
                   setState(() {
-                    // emailController.text.isEmpty
-                    //     ? _validateEmail = true
-                    //     : _validateEmail = false;
                     passwordController.text.isEmpty
                         ? _validatePassword = true
                         : _validatePassword = false;
                   });
+                  if(await checkLogin(emailController.text,passwordController.text)){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return HomePage(title: 'HomePage');
+                    }));
+                    _snackBar('Login Success :)');
+                  } else {
+                    _snackBar('fail!!!');
+                  }
                 },
               )),
           Row(
@@ -158,4 +172,34 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
     );
   }
+
+
+  _snackBar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(text),
+          action: SnackBarAction(
+            label: 'OK!',
+            onPressed: () {
+              // Some code to undo the change.
+            },
+          ),
+        )
+    );
+  }
+
+  Future<bool> checkLogin(String email, String password) async {
+
+    var result = await dbHelper.login(email, password);
+
+    // Text( '${users[index].email} - ${users[index].password}');
+
+    if(result){
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
 }
