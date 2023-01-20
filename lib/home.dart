@@ -58,6 +58,7 @@ const drawerHeader = UserAccountsDrawerHeader(
     ),
   ),
 );
+
 final drawerItems = ListView(
 
   children: <Widget>[
@@ -69,16 +70,20 @@ final drawerItems = ListView(
           Text('  NAME'),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+
+      },
     ),
     ListTile(
       title: Row(
         children: const [
           Icon(Icons.mail),
-          Text('  EMAIL'),
+          Text('hjgkj'),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+
+      },
     ),
     ListTile(
       title: Row(
@@ -87,7 +92,9 @@ final drawerItems = ListView(
           Text('  CONTACT'),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+
+      },
     ),
     ListTile(
       title: Row(
@@ -96,7 +103,9 @@ final drawerItems = ListView(
           Text('  CITY'),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+
+      },
     ),
     ListTile(
       title: Row(
@@ -105,7 +114,9 @@ final drawerItems = ListView(
           Text('  ADDRESS'),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+
+      },
     ),
     ListTile(
       title: Row(
@@ -114,7 +125,9 @@ final drawerItems = ListView(
           Text('  PASSWORD'),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+
+      },
     ),
     ListTile(
       title: Row(
@@ -216,7 +229,6 @@ Future<void> _showDialog(BuildContext context) async {
 }
 
 class HomeWidget extends StatefulWidget {
-
 
   const HomeWidget({Key? key}) : super(key: key);
 

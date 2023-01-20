@@ -63,7 +63,7 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
     super.dispose();
   }
 
-  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = new GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   void _showMessageInScaffold(String message){
     _scaffoldKey.currentState?.showSnackBar(
@@ -262,10 +262,8 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                           style: TextStyle(fontSize: 16),
                         ),
                         onPressed: () {
-                          //register screen
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return const MyApp();
+                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                            return MyApp();
                           }));
                         },
                       )

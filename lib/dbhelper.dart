@@ -80,6 +80,16 @@ class DatabaseHelper {
     return await db.query(table);
   }
 
+  Future<List<Map>> getLoggerDetails(email) async {
+    Database db = await instance.database;
+
+    List<Map> maps = await db.query(table,
+        columns: ['name','email','contact','city','address','password'],
+        where: 'email = ?',
+        whereArgs: [email]);
+    return maps;
+  }
+
 
 
   Future<bool> login(email,password) async {
@@ -92,13 +102,9 @@ class DatabaseHelper {
         whereArgs: [email]);
 
     if (maps.isNotEmpty && maps[0]['password'] == password) {
-
       db.update(table, {'status': 'logged_in'}, where: 'email = ?', whereArgs: [email]);
-
       await FlutterSession().set('loggedUser',email);
-
       return true;
-
     } else {
       return false;
     }
@@ -109,7 +115,7 @@ class DatabaseHelper {
     Database db = await instance.database;
 
     int result = await db.update(table, {'status': 'logged_out'}, where: 'email = ?', whereArgs: [email]);
-
+    await FlutterSession().set('loggedUser',null);
     if (result > 0) {
       return true;
     } else {
