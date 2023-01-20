@@ -8,8 +8,9 @@ class User {
   String? city;
   String? address;
   String? password;
+  String? status;
 
-  User(this.id, this.name, this.email, this.contact, this.city, this.address, this.password);
+  User(this.id, this.name, this.email, this.contact, this.city, this.address, this.password, this.status);
 
   User.fromMap(Map<String, dynamic> map) {
     id = map['id'];
@@ -19,6 +20,7 @@ class User {
     city = map['city'];
     address = map['address'];
     password = map['password'];
+    status = map['status'];
   }
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class User {
       DatabaseHelper.columnCity : city,
       DatabaseHelper.columnAddress : address,
       DatabaseHelper.columnPassword: password,
+      DatabaseHelper.columnStatus: status,
     };
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logreg/dbhelper.dart';
 import 'package:logreg/user.dart';
@@ -241,7 +242,8 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                         String city = _ipCity.text;
                         String address = _ipAddress.text;
                         String password = _ipPassword.text;
-                        _insert(name, email, contact, city, address, password);
+                        String status = 'logged_out';
+                        _insert(name, email, contact, city, address, password, status);
                       },
                       splashColor: Colors.redAccent,
                       child: const Text(
@@ -286,7 +288,7 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
         ]));
   }
 
-  void _insert(name, email, contact, city, address, password) async {
+  void _insert(name, email, contact, city, address, password, status) async {
     // row to insert
     Map<String, dynamic> row = {
       DatabaseHelper.columnName: name,
@@ -295,17 +297,20 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
       DatabaseHelper.columnCity: city,
       DatabaseHelper.columnAddress: address,
       DatabaseHelper.columnPassword: password,
+      DatabaseHelper.columnStatus: status,
     };
     User user = User.fromMap(row);
     final id = await dbHelper.insert(user);
     _showMessageInScaffold('inserted row id: $id');
-    print('inseted');
+    debugPrint('Data Inserted :)');
   }
 
   void _getData() async {
     final allRows = await dbHelper.queryAllRows();
     users.clear();
-    allRows.forEach((row) => users.add(User.fromMap(row)));
+    for (var row in allRows) {
+      users.add(User.fromMap(row));
+    }
     _showMessageInScaffold('Query done.');
     setState(() {});
   }

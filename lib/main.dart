@@ -5,6 +5,9 @@ import 'package:logreg/register.dart';
 import 'package:logreg/home.dart';
 import 'package:sqflite/sqflite.dart';
 
+final GlobalKey<ScaffoldMessengerState> scaffoldKey =
+GlobalKey<ScaffoldMessengerState>();
+
 void main() {
   runApp(const MyApp());
 }
@@ -19,6 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
+      scaffoldMessengerKey: scaffoldKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -199,7 +203,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     } else {
       return false;
     }
-
   }
 
 }

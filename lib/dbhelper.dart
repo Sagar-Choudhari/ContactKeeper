@@ -1,6 +1,8 @@
 import 'package:logreg/user.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter_session/flutter_session.dart';
+
 
 class DatabaseHelper {
 
@@ -16,6 +18,7 @@ class DatabaseHelper {
   static const columnCity = 'city';
   static const columnAddress = 'address';
   static const columnPassword = 'password';
+  static const columnStatus = 'status';
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -51,7 +54,8 @@ class DatabaseHelper {
             $columnContact TEXT NOT NULL,
             $columnCity TEXT NOT NULL,
             $columnAddress TEXT NOT NULL,
-            $columnPassword TEXT NOT NULL
+            $columnPassword TEXT NOT NULL,
+            $columnStatus TEXT NOT NULL
           )
           ''');
   }
@@ -59,7 +63,16 @@ class DatabaseHelper {
 
   Future<int> insert(User users) async {
     Database db = await instance.database;
-    return await db.insert(table, {'name': users.name, 'email': users.email, 'contact': users.contact, 'city': users.city, 'address': users.address, 'password': users.password});
+    return await db.insert(table,
+        {
+          'name': users.name,
+          'email': users.email,
+          'contact': users.contact,
+          'city': users.city,
+          'address': users.address,
+          'password': users.password,
+          'status': users.status
+        });
   }
 
   Future<List<Map<String, dynamic>>> queryAllRows() async {
@@ -78,13 +91,30 @@ class DatabaseHelper {
         where: 'email = ?',
         whereArgs: [email]);
 
-
     if (maps.isNotEmpty && maps[0]['password'] == password) {
+
+      db.update(table, {'status': 'logged_in'}, where: 'email = ?', whereArgs: [email]);
+
+      await FlutterSession().set('loggedUser',email);
+
+      return true;
+
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> logout(String email) async {
+
+    Database db = await instance.database;
+
+    int result = await db.update(table, {'status': 'logged_out'}, where: 'email = ?', whereArgs: [email]);
+
+    if (result > 0) {
       return true;
     } else {
       return false;
     }
-
   }
 
 

@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:logreg/user.dart';
 import 'package:logreg/dbhelper.dart';
+import 'package:logreg/main.dart';
+import 'package:flutter_session/flutter_session.dart';
+
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
@@ -9,6 +12,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
@@ -29,6 +33,21 @@ class HomePage extends StatelessWidget {
   }
 }
 
+// _snackBar(String text, Color colors) {
+//   ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(
+//         content: Text(text),
+//         backgroundColor: colors,
+//         action: SnackBarAction(
+//           label: 'OK!',
+//           onPressed: () {
+//             // Some code to undo the change.
+//           },
+//         ),
+//       )
+//   );
+// }
+
 const drawerHeader = UserAccountsDrawerHeader(
   accountName: Text('Sagar'),
   accountEmail: Text('Sagar@123.com'),
@@ -40,6 +59,7 @@ const drawerHeader = UserAccountsDrawerHeader(
   ),
 );
 final drawerItems = ListView(
+
   children: <Widget>[
     drawerHeader,
     ListTile(
@@ -100,24 +120,42 @@ final drawerItems = ListView(
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          Icon(Icons.arrow_back_rounded),
-          Text('  Go Back'),
+          Icon(Icons.logout),
+          Text('  Logout'),
         ],
       ),
-      onTap: () {},
-    ),
-    ListTile(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.exit_to_app),
-          Text('  Exit'),
-        ],
-      ),
-      onTap: () => exit(0),
+      onTap: () async {
+        var checkSession = await FlutterSession().get('loggedUser');
+        // if(){
+        //   const SnackBar snackBar =
+        //   SnackBar(
+        //     content: Text('Logged Out :('),
+        //     backgroundColor: Colors.orange,
+        //   );
+        //   scaffoldKey.currentState?.showSnackBar(snackBar);
+        //
+        //
+        // } else {
+        //   const SnackBar snackBar =
+        //   SnackBar(
+        //     content: Text('Fail to Logout :)'),
+        //     backgroundColor: Colors.green,
+        //   );
+        //   scaffoldKey.currentState?.showSnackBar(snackBar);
+        // }
+        _logout(checkSession);
+      },
     )
   ],
 );
+
+
+final dbHelper = DatabaseHelper.instance;
+Future<bool> _logout(email) async {
+  await dbHelper.logout(email);
+  return true;
+}
+
 
 TextEditingController _textFieldName = TextEditingController();
 TextEditingController _textFieldContact = TextEditingController();
@@ -178,6 +216,8 @@ Future<void> _showDialog(BuildContext context) async {
 }
 
 class HomeWidget extends StatefulWidget {
+
+
   const HomeWidget({Key? key}) : super(key: key);
 
   @override
@@ -187,6 +227,8 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   final dbHelper = DatabaseHelper.instance;
   final List<User> users = [];
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +240,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: Text('$index'),
         ),
         title: Text(
-          '[${users[index].id}] ${users[index].name} - ${users[index].email} - ${users[index].contact} - ${users[index].address}',
+          '[${users[index].id}] = ${users[index].status} = ${users[index].name} - ${users[index].email} - ${users[index].contact} - ${users[index].address}',
           style: const TextStyle(fontSize: 18),
         ),
         trailing: IconButton(
@@ -249,15 +291,19 @@ class _HomeWidgetState extends State<HomeWidget> {
   void _getData() async {
     final allRows = await dbHelper.queryAllRows();
     users.clear();
-    allRows.forEach((row) => users.add(User.fromMap(row)));
+    for (var row in allRows) {
+      users.add(User.fromMap(row));
+    }
     // _showMessageInScaffold('Query done.');
     setState(() {});
   }
+
 
   void _delete(id) async {
     Text('$id deleted');
     await dbHelper.delete(id);
     // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
-
   }
 }
+
+

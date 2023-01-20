@@ -15,6 +15,7 @@ dependencies:
   path:
   sqflite:
   shared_preferences:
+  flutter_session:
 
 dev_dependencies:
   flutter_test:
