@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:logreg/contactregister.dart';
-import 'package:logreg/user.dart';
-import 'package:logreg/dbhelper.dart';
+import 'package:logreg/data_models/user.dart';
+import 'package:logreg/databasehelper/dbhelper.dart';
 import 'package:logreg/register.dart';
 import 'package:logreg/home.dart';
 import 'package:logreg/userregister.dart';
 import 'dart:ui' as ui;
 import 'package:sqflite/sqflite.dart';
 
-import 'getc.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldKey =
 GlobalKey<ScaffoldMessengerState>();
@@ -32,12 +31,9 @@ class Value {
 }
 
 class MyApp extends StatelessWidget {
-   const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   static const String _title = 'LoggerAppVITPL';
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -159,14 +155,23 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ? _validatePassword = true
                         : _validatePassword = false;
                   });
-                  if(await checkLogin(emailController.text,passwordController.text)){
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_context) => HomePage()));
-                    _snackBar('Login Success :)');
-                  } else {
-                    _snackBar('fail!!!');
+                  if(emailController.text.isEmpty && passwordController.text.isEmpty){
+                    _validateEmail = true;
+                    _validatePassword = true;
+                    debugPrint(emailController.text + '\n');
+                    debugPrint(passwordController.text);
                   }
-                  Value.setString(emailController.text);
+                  else{
+                    if(await checkLogin(emailController.text,passwordController.text)){
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_context) => HomePage()));
+                      _snackBar('Login Success :)');
+                    } else {
+                      _snackBar('fail!!!');
+                    }
+                    Value.setString(emailController.text);
+                  }
+
                   setState(() {
                     _isLoading=false;
                   });

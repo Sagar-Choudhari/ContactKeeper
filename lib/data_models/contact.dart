@@ -1,4 +1,4 @@
-import 'package:logreg/dbhelper.dart';
+import 'package:logreg/databasehelper/dbhelper.dart';
 
 class Contact {
   int? id;

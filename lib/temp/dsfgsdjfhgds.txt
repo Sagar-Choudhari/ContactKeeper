@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:logreg/data_models/user.dart';
-import 'package:logreg/data_models/contact.dart';
-import 'package:logreg/databasehelper/dbhelper.dart';
+import 'package:logreg/user.dart';
+import 'package:logreg/contact.dart';
+import 'package:logreg/dbhelper.dart';
 import 'package:logreg/main.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:sqflite/sqflite.dart';
@@ -60,6 +60,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<bool> _deleteC(id) async {
+    var ret = await dbHelper.deleteContact(id);
+    debugPrint('Deleted = $ret');
+    _getData(currentUser);
+    return true;
+  }
+
   Future<List<Map>> _getData2(email) async {
     Database db = await openDatabase("users.db");
     _data = await db.query(DatabaseHelper.table,
@@ -72,13 +79,6 @@ class _HomePageState extends State<HomePage> {
   Future<dynamic> _logout(email) async {
     await dbHelper.logout(email);
     Value.setString('null');
-    return true;
-  }
-
-  Future _delete(id) async {
-    var ret = await dbHelper.deleteContact(id);
-    debugPrint('Deleted = $ret');
-    _getData(currentUser);
     return true;
   }
 
@@ -244,13 +244,13 @@ class _HomePageState extends State<HomePage> {
                                   child: ListTile(
                                     leading: const Icon(Icons.perm_contact_calendar),
                                     title: Text('${contacts['name']} + ${contacts['user']}'),
-                                    subtitle: Text(
-                                        "ID:${contacts['id']}, Con: ${contacts['contact']}, Add: ${contacts['address']}"),
+                                    subtitle: Text("ID:${contacts['id']}, Con: ${contacts['contact']}, Add: ${contacts['address']}"),
                                     trailing: IconButton(
                                             onPressed: () {
                                               // await dbHelper.deleteContact(contacts["id"]);
-                                              _delete(contacts['id']);
-                                              debugPrint("Data Deleted");
+                                              if(_deleteC(contacts['id']) == true){
+                                                debugPrint("Data Deleted");
+                                              }
                                               _getData(currentUser);
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(SnackBar(
@@ -262,7 +262,8 @@ class _HomePageState extends State<HomePage> {
                                                   content: const Text("Contact Data Deleted")));
                                               _getData(currentUser);
                                             },
-                                            icon: const Icon(Icons.delete,
+                                            icon: const Icon(
+                                                Icons.delete,
                                                 color: Colors.red))
                                   )
                               );
@@ -272,6 +273,39 @@ class _HomePageState extends State<HomePage> {
                 )),
     );
   }
+  // Widget buildRow(int index) {
+  //   final item = _data[index];
+  //   return ListTile(
+  //     leading: CircleAvatar(
+  //       child: Text('$index'),
+  //     ),
+  //     title: Text(
+  //       '[${contacts[index].id?.toInt()}] = ${contacts[index].user} = ${contacts[index].name} - ${contacts[index].contact} - ${contacts[index].address}',
+  //       style: const TextStyle(fontSize: 18),
+  //     ),
+  //     trailing: IconButton(
+  //         onPressed: () {
+  //           setState(() {
+  //             _deleteContact(contacts[index].id);
+  //             _getData(_data[0]['id']?.toInt());
+  //           });
+  //         },
+  //         icon: const Icon(
+  //           Icons.delete_forever,
+  //           color: Colors.red,
+  //           size: 26,
+  //         )
+  //     ),
+  //     selected: true,
+  //     onTap: () {
+  //       setState(() {
+  //         if (kDebugMode) {
+  //           print('item tapped');
+  //         }
+  //       });
+  //     },
+  //   );
+  // }
 
   final TextEditingController _textFieldName = TextEditingController();
   final TextEditingController _textFieldContact = TextEditingController();
@@ -413,3 +447,41 @@ class _HomePageState extends State<HomePage> {
     debugPrint('Data Inserted :)');
   }
 }
+------------------------------------------------------------------------------
+
+
+
+
+Column(
+                            // children: _contacts.map((contacts) {
+                            //   return Card(
+                            //       elevation: 5,
+                            //       color: Colors.white70,
+                            //       child: ListTile(
+                            //         leading: const Icon(Icons.perm_contact_calendar),
+                            //         title: Text('${contacts['name']} + ${contacts['user']}'),
+                            //         subtitle: Text("ID:${contacts['id']}, Con: ${contacts['contact']}, Add: ${contacts['address']}"),
+                            //         trailing: IconButton(
+                            //                 onPressed: () {
+                            //                   // await dbHelper.deleteContact(contacts["id"]);
+                            //                   if(_deleteC(contacts['id']) == true){
+                            //                     debugPrint("Data Deleted");
+                            //                   }
+                            //                   _getData(currentUser);
+                            //                   ScaffoldMessenger.of(context)
+                            //                       .showSnackBar(SnackBar(
+                            //                       backgroundColor: Colors.blue,
+                            //                       action: SnackBarAction(
+                            //                         label: 'OK!',
+                            //                         onPressed: () {},
+                            //                       ),
+                            //                       content: const Text("Contact Data Deleted")));
+                            //                   _getData(currentUser);
+                            //                 },
+                            //                 icon: const Icon(
+                            //                     Icons.delete,
+                            //                     color: Colors.red))
+                            //       )
+                            //   );
+                            // }).toList(),
+                          ),

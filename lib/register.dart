@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:logreg/dbhelper.dart';
-import 'package:logreg/user.dart';
+import 'package:logreg/databasehelper/dbhelper.dart';
+import 'package:logreg/data_models/user.dart';
 
 import 'main.dart';
 
@@ -243,7 +243,34 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                         String address = _ipAddress.text;
                         String password = _ipPassword.text;
                         String status = 'logged_out';
-                        _insert(name, email, contact, city, address, password, status);
+
+                        if(_nameValidate && _emailValidate && _contactValidate && _cityValidate && _addressValidate && _passwordValidate && _password2Validate ){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Filed can not be empty??'),
+                                action: SnackBarAction(
+                                  label: 'OK!',
+                                  onPressed: () {
+                                    // Some code to undo the change.
+                                  },
+                                ),
+                              )
+                          );
+                        }
+                        else {
+                          _insert(name, email, contact, city, address, password, status);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Registered Successfully :)'),
+                                action: SnackBarAction(
+                                  label: 'OK!',
+                                  onPressed: () {
+                                    // Some code to undo the change.
+                                  },
+                                ),
+                              )
+                          );
+                        }
                       },
                       splashColor: Colors.redAccent,
                       child: const Text(

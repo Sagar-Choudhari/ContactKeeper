@@ -1,5 +1,5 @@
-import 'package:logreg/user.dart';
-import 'package:logreg/contact.dart';
+import 'package:logreg/data_models/user.dart';
+import 'package:logreg/data_models/contact.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -188,7 +188,7 @@ class DatabaseHelper {
   Future<int> deleteContact(user) async {
     Database db = await instance.database;
     return await db.delete(tableContact,
-        where: '$contactUser = ?',
+        where: '$contactId = ?',
         whereArgs: [user]
     );
   }

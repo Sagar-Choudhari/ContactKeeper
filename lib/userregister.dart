@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:logreg/user.dart';
-import 'package:logreg/dbhelper.dart';
+import 'package:logreg/data_models/user.dart';
+import 'package:logreg/databasehelper/dbhelper.dart';
 import 'package:logreg/main.dart';
 
 
