@@ -1,4 +1,5 @@
 import 'package:logreg/user.dart';
+import 'package:logreg/contact.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -10,6 +11,7 @@ class DatabaseHelper {
   static const _databaseVersion = 1;
 
   static const table = 'users_table';
+  static const tableContact = 'contact_table';
 
   static const columnId = 'id';
   static const columnName = 'name';
@@ -19,6 +21,12 @@ class DatabaseHelper {
   static const columnAddress = 'address';
   static const columnPassword = 'password';
   static const columnStatus = 'status';
+
+  static const contactId = 'id';
+  static const contactUser = 'user';
+  static const contactName = 'name';
+  static const contactContact = 'contact';
+  static const contactAddress = 'address';
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -58,6 +66,15 @@ class DatabaseHelper {
             $columnStatus TEXT NOT NULL
           )
           ''');
+    await db.execute('''
+          CREATE TABLE $tableContact ( 
+            $contactId INTEGER PRIMARY KEY AUTOINCREMENT,
+            $contactUser TEXT NOT NULL,
+            $contactName TEXT NOT NULL,
+            $contactContact TEXT NOT NULL,
+            $contactAddress TEXT NOT NULL 
+          )
+          ''');
   }
 
 
@@ -75,9 +92,34 @@ class DatabaseHelper {
         });
   }
 
+  Future<int> insertContact(Contact contacts) async {
+    Database db = await instance.database;
+    return await db.insert(tableContact,
+        {
+          'user': contacts.user,
+          'name': contacts.name,
+          'contact': contacts.contact,
+          'address': contacts.address
+        });
+  }
+
   Future<List<Map<String, dynamic>>> queryAllRows() async {
     Database db = await instance.database;
     return await db.query(table);
+  }
+
+  Future<List<Map<String, dynamic>>> queryAllContact() async {
+    Database db = await instance.database;
+    return await db.query(tableContact);
+  }
+
+  Future<List<Map>> getOnlyMatchedContact(email) async {
+    Database db = await instance.database;
+    List<Map> maps = await db.query(tableContact,
+        columns: ['name', 'contact','address'],
+        where: 'user = ?',
+        whereArgs: [email]);
+    return maps;
   }
 
   Future<List<Map>> getLoggerDetails(email) async {
@@ -89,8 +131,6 @@ class DatabaseHelper {
         whereArgs: [email]);
     return maps;
   }
-
-
 
   Future<bool> login(email,password) async {
     Database db = await instance.database;
@@ -110,6 +150,12 @@ class DatabaseHelper {
     }
   }
 
+  _getData() async {
+    Database db = await openDatabase('users.db');
+    List<Map> _data = await db.query('users_table');
+    return;
+  }
+
   Future<bool> logout(String email) async {
 
     Database db = await instance.database;
@@ -123,12 +169,10 @@ class DatabaseHelper {
     }
   }
 
-
   Future<int?> queryRowCount() async {
     Database db = await instance.database;
     return Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $table'));
   }
-
 
   Future<int> update(User users) async {
     Database db = await instance.database;
@@ -136,9 +180,16 @@ class DatabaseHelper {
     return await db.update(table, users.toMap(), where: '$columnId = ?', whereArgs: [id]);
   }
 
-
   Future<int> delete(int id) async {
     Database db = await instance.database;
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteContact(user) async {
+    Database db = await instance.database;
+    return await db.delete(tableContact,
+        where: '$contactUser = ?',
+        whereArgs: [user]
+    );
   }
 }

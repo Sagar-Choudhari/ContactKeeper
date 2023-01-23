@@ -1,0 +1,885 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:logreg/user.dart';
+import 'package:logreg/contact.dart';
+import 'package:logreg/dbhelper.dart';
+import 'package:logreg/main.dart';
+import 'package:flutter_session/flutter_session.dart';
+import 'package:sqflite/sqflite.dart';
+
+
+class HomePage extends StatefulWidget {
+  HomePage({Key? key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final dbHelper = DatabaseHelper.instance;
+  final List<User> users = [];
+  final List<Contact> contacts = [];
+  static List<Map> _data = [];
+  // List<Map<String, dynamic>> _data =[];
+
+  var currentUser = _data[0]['id'];
+
+
+  @override
+  initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) {
+          debugPrint("WIDGET LOADED VRO == ${Value.getString()}");
+          if(_data.isEmpty){
+            debugPrint('LIST IS EMPTYYYYYYYY == ${Value.getString()}' );
+          }
+        });
+    _getData2(Value.getString());
+    _getData(_data[0]['id']);
+  }
+
+  Future<List<Map>> _getData(user) async {
+    Database db = await openDatabase("users.db");
+    _data = await db.query(DatabaseHelper.table,
+        columns: ['name', 'contact','address'],
+        where: 'id = ?',
+        whereArgs: [user]);
+    setState(() {});
+    return _data;
+  }
+
+  // void _delete(id) async {
+  //   Text('$id deleted');
+  //   await dbHelper.delete(id);
+  //   // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
+  // }
+
+  Future<List<Map>> _getData2(email) async {
+    Database db = await openDatabase("users.db");
+    _data = await db.query(DatabaseHelper.table,
+        columns: ['name', 'email','contact','city','address','password'],
+        where: 'email = ?',
+        whereArgs: [email]);
+    return _data;
+  }
+
+  Future<dynamic> _logout(email) async {
+    await dbHelper.logout(email);
+    Value.setString('null');
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        title: const Text('Dashboard'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                _data[0]['name'],
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              accountEmail: Text('${_data[0]['email']}'),
+              currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: FlutterLogo(
+                  size: 42.0,
+                ),
+              ),
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.person),
+                  Container(width: 15,),
+                  Text(_data[0]['name']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.mail),
+                  Container(width: 15,),
+                  Text(_data[0]['email']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.call),
+                  Container(width: 15,),
+                  Text(_data[0]['contact']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.add_business),
+                  Container(width: 15,),
+                  Text(_data[0]['city']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.home_work_outlined),
+                  Container(width: 15,),
+                  Text(_data[0]['address']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.password),
+                  Container(width: 15,),
+                  Text(_data[0]['password'] + Value.getString()),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.logout),
+                  Container(width: 15,),
+                  Text('Logout'),
+                ],
+              ),
+              onTap: () async {
+
+                Navigator.pop(context);
+
+                var checkSession = await FlutterSession().get('loggedUser');
+                if(_logout(checkSession) == true){
+
+                  debugPrint('LOGGED OUT');
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Logged Out :('),
+                        backgroundColor: Colors.orange,
+                      )
+                  );
+
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  //   return const MyApp();
+                  // }));
+
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to Logout :)'),
+                        backgroundColor: Colors.green,
+                      )
+                  );
+                }
+              },
+            )
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showDialog(context);
+        },
+        tooltip: 'Add Contact',
+        child: const Icon(Icons.add),
+      ),
+      body: Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(1),
+          child: _data == null
+              ? Center(child: CircularProgressIndicator())
+              : Scrollbar(
+              isAlwaysShown: true, //always show scrollbar
+              thickness: 7, //width of scrollbar
+              radius: Radius.circular(4), //corner radius of scrollbar
+              scrollbarOrientation: ScrollbarOrientation.left, //which side to show scrollbar
+              child: ListView.separated(
+                padding: const EdgeInsets.all(8),
+                itemCount: _data.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  print('object');
+                  // if (index == _data.length) {
+                  //   return ElevatedButton(
+                  //     child: const Text('Refresh'),
+                  //     onPressed: () {
+                  //       setState(() {
+                  //         _getData(_data[0]['id']);
+                  //       });
+                  //     },
+                  //   );
+                  // }
+                  return buildRow(index);
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                return const Divider();
+              },
+              )
+          )
+      ),
+    );
+  }
+  Widget buildRow(int index) {
+    final item = _data[index];
+    return ListTile(
+      leading: CircleAvatar(
+        child: Text('$index'),
+      ),
+      title: Text(
+        '[${contacts[index].id?.toInt()}] = ${contacts[index].user} = ${contacts[index].name} - ${contacts[index].contact} - ${contacts[index].address}',
+        style: const TextStyle(fontSize: 18),
+      ),
+      trailing: IconButton(
+          onPressed: () {
+            setState(() {
+              _deleteContact(contacts[index].id);
+              _getData(_data[0]['id']?.toInt());
+            });
+          },
+          icon: const Icon(
+            Icons.delete_forever,
+            color: Colors.red,
+            size: 26,
+          )
+      ),
+      selected: true,
+      onTap: () {
+        setState(() {
+          if (kDebugMode) {
+            print('item tapped');
+          }
+        });
+      },
+    );
+  }
+
+  final TextEditingController _textFieldName = TextEditingController();
+  final TextEditingController _textFieldContact = TextEditingController();
+  final TextEditingController _textFieldAddress = TextEditingController();
+
+  bool _diaNameValidate = false;
+  bool _diaContactValidate = false;
+  bool _diaAddressValidate = false;
+
+  @override
+  void dispose() {
+    _textFieldName.dispose();
+    _textFieldContact.dispose();
+    _textFieldAddress.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showDialog(BuildContext context) async {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: const Text("Add Contact"),
+          shape: RoundedRectangleBorder(
+              borderRadius:
+              BorderRadius.circular(10.0)),
+          content: Container(
+            width: 345,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  onChanged: (value) {},
+                  controller: _textFieldName,
+                  maxLength: 25,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    hintText: "Enter name",
+                    icon: const Icon(Icons.perm_contact_cal),
+                    errorText:
+                    _diaNameValidate ? 'Name cannot be empty' : null,
+                  ),
+                ),
+                Container(height: 10,),
+                TextField(
+                  onChanged: (value) {},
+                  controller: _textFieldContact,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 12,
+                  decoration: InputDecoration(
+                    hintText: "Enter contact",
+                    icon: const Icon(Icons.call),
+                    labelText: 'Contact',
+                    errorText:
+                    _diaContactValidate ? 'Contact cannot be empty' : null,
+                  ),
+                ),
+                Container(height: 10,),
+                TextField(
+                  onChanged: (value) {},
+                  controller: _textFieldAddress,
+                  keyboardType: TextInputType.streetAddress,
+                  decoration: InputDecoration(
+                    hintText: "Enter address",
+                    labelText: 'Address',
+                    icon: const Icon(Icons.home_work_outlined),
+                    errorText:
+                    _diaAddressValidate ? 'Address cannot be empty' : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.deepOrange),
+              ),
+              child: const Text('CANCEL'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_textFieldName.text.isEmpty ||
+                    !RegExp(r'^[a-z A-Z]+$').hasMatch(_textFieldName.text))
+                {
+                  setState(() => _diaNameValidate = true );
+                }
+                else
+                {
+                  setState(() => _diaNameValidate = false );
+                }
+                if (_textFieldContact.text.isEmpty ||
+                    !RegExp(r'^(\+\d{1,3}[- ]?)?\d{10}$')
+                        .hasMatch(_textFieldContact.text))
+                {
+                  setState(() => _diaContactValidate = true );
+                }
+                else
+                {
+                  setState(() => _diaContactValidate = false );
+                }
+                setState(() {
+                  _textFieldAddress.text.isEmpty
+                      ? _diaAddressValidate = true
+                      : _diaAddressValidate = false;
+                });
+                String name = _textFieldName.text;
+                String contact = _textFieldContact.text;
+                String address = _textFieldAddress.text;
+                _insertContact(currentUser, name, contact, address);
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+              ),
+              child: const Text('SAVE'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _getData3() async {
+    final allRows = await dbHelper.queryAllContact();
+    contacts.clear();
+    for (var row in allRows) {
+      contacts.add(Contact.fromMap(row));
+    }
+    // _showMessageInScaffold('Query done.');
+    setState(() {});
+  }
+  void _insertContact(user, name, contact, address) async {
+    // row to insert
+    Map<String, dynamic> row = {
+      DatabaseHelper.contactUser: user,
+      DatabaseHelper.contactName: name,
+      DatabaseHelper.contactContact: contact,
+      DatabaseHelper.contactAddress: address,
+    };
+    Contact contacts = Contact.fromMap(row);
+    final id = await dbHelper.insertContact(contacts);
+    debugPrint('inserted row id: $id \n');
+    debugPrint('Data Inserted :)');
+  }
+
+  void _deleteContact(id) async {
+    debugPrint('$id deleted');
+    await dbHelper.deleteContact(id);
+    // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
+  }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:logreg/user.dart';
+import 'package:logreg/contact.dart';
+import 'package:logreg/dbhelper.dart';
+import 'package:logreg/main.dart';
+import 'package:flutter_session/flutter_session.dart';
+import 'package:sqflite/sqflite.dart';
+
+
+class HomePage extends StatefulWidget {
+  HomePage({Key? key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final dbHelper = DatabaseHelper.instance;
+  final List<User> users = [];
+  static List<Map> _data = [];
+  final List<Contact> contacts = [];
+  static List<Map> _contacts = [];
+
+  // List<Map<String, dynamic>> _data =[];
+
+  var currentUser = _data[0]['id'];
+
+
+  @override
+  initState() {
+    dbHelper.database;
+    _getData2(Value.getString());
+    _getData(_data[0]['id']);
+    super.initState();
+
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) {
+      debugPrint("WIDGET LOADED VRO == ${Value.getString()}");
+      if(_data.isEmpty){
+        debugPrint('LIST IS EMPTYYYYYYYY == ${Value.getString()}' );
+      }
+    });
+  }
+
+  _getData(user) {
+    Future.delayed(Duration(milliseconds: 500),() async {
+      Database db = await openDatabase("users.db");
+      _contacts = await db.query(DatabaseHelper.table,
+          columns: ['name', 'contact', 'address'],
+          where: 'id = ?',
+          whereArgs: [user]);
+      setState(() {});
+      return _contacts;
+    });
+  }
+
+  // void _delete(id) async {
+  //   Text('$id deleted');
+  //   await dbHelper.delete(id);
+  //   // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
+  // }
+
+  Future<List<Map>> _getData2(email) async {
+    Database db = await openDatabase("users.db");
+    _data = await db.query(DatabaseHelper.table,
+        columns: ['name', 'email','contact','city','address','password'],
+        where: 'email = ?',
+        whereArgs: [email]);
+    return _data;
+  }
+
+  Future<dynamic> _logout(email) async {
+    await dbHelper.logout(email);
+    Value.setString('null');
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        title: const Text('Dashboard'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                _data[0]['name'],
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              accountEmail: Text('${_data[0]['email']}'),
+              currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: FlutterLogo(
+                  size: 42.0,
+                ),
+              ),
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.person),
+                  Container(width: 15,),
+                  Text(_data[0]['name']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.mail),
+                  Container(width: 15,),
+                  Text(_data[0]['email']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.call),
+                  Container(width: 15,),
+                  Text(_data[0]['contact']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.add_business),
+                  Container(width: 15,),
+                  Text(_data[0]['city']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.home_work_outlined),
+                  Container(width: 15,),
+                  Text(_data[0]['address']),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.password),
+                  Container(width: 15,),
+                  Text(_data[0]['password'] + Value.getString()),
+                ],
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.logout),
+                  Container(width: 15,),
+                  Text('Logout'),
+                ],
+              ),
+              onTap: () async {
+
+                Navigator.pop(context);
+
+                var checkSession = await FlutterSession().get('loggedUser');
+                if(_logout(checkSession) == true){
+
+                  debugPrint('LOGGED OUT');
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Logged Out :('),
+                        backgroundColor: Colors.orange,
+                      )
+                  );
+
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  //   return const MyApp();
+                  // }));
+
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to Logout :)'),
+                        backgroundColor: Colors.green,
+                      )
+                  );
+                }
+              },
+            )
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showDialog(context);
+        },
+        tooltip: 'Add Contact',
+        child: const Icon(Icons.add),
+      ),
+      body: Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(1),
+          child: _contacts == null ? Center(child: CircularProgressIndicator()) : SingleChildScrollView(
+            child: Container(
+              child: _contacts.length == 0 ? Text("No Contacts.") :
+              Column(
+                children: _contacts.map((contacts){
+                  return Card(
+                      child: ListTile(
+                      leading: Icon(Icons.people),
+                      title: Text(contacts["name"]),
+                      subtitle: Text("Roll No:${contacts["roll_no"]}, Add: " + contacts["address"]),
+                      trailing: Wrap(children: [
+                          IconButton(onPressed: () async {
+                  // await mydb.db.rawDelete("DELETE FROM students WHERE roll_no = ?", [stuone["roll_no"]]);
+                  await dbHelper.deleteContact(contacts["id"]);
+
+                  //delete student data with roll no.
+                  print("Data Deleted");
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Student Data Deleted")));
+                  _getData(currentUser);
+                  }, icon: Icon(Icons.delete, color:Colors.red))
+],),
+                  )
+                  );
+                }).toList(),
+              ),
+            ),
+          )
+      ),
+    );
+  }
+  // Widget buildRow(int index) {
+  //   final item = _data[index];
+  //   return ListTile(
+  //     leading: CircleAvatar(
+  //       child: Text('$index'),
+  //     ),
+  //     title: Text(
+  //       '[${contacts[index].id?.toInt()}] = ${contacts[index].user} = ${contacts[index].name} - ${contacts[index].contact} - ${contacts[index].address}',
+  //       style: const TextStyle(fontSize: 18),
+  //     ),
+  //     trailing: IconButton(
+  //         onPressed: () {
+  //           setState(() {
+  //             _deleteContact(contacts[index].id);
+  //             _getData(_data[0]['id']?.toInt());
+  //           });
+  //         },
+  //         icon: const Icon(
+  //           Icons.delete_forever,
+  //           color: Colors.red,
+  //           size: 26,
+  //         )
+  //     ),
+  //     selected: true,
+  //     onTap: () {
+  //       setState(() {
+  //         if (kDebugMode) {
+  //           print('item tapped');
+  //         }
+  //       });
+  //     },
+  //   );
+  // }
+
+  final TextEditingController _textFieldName = TextEditingController();
+  final TextEditingController _textFieldContact = TextEditingController();
+  final TextEditingController _textFieldAddress = TextEditingController();
+
+  bool _diaNameValidate = false;
+  bool _diaContactValidate = false;
+  bool _diaAddressValidate = false;
+
+  @override
+  void dispose() {
+    _textFieldName.dispose();
+    _textFieldContact.dispose();
+    _textFieldAddress.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showDialog(BuildContext context) async {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: const Text("Add Contact"),
+          shape: RoundedRectangleBorder(
+              borderRadius:
+              BorderRadius.circular(10.0)),
+          content: Container(
+            width: 345,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  onChanged: (value) {},
+                  controller: _textFieldName,
+                  maxLength: 25,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    hintText: "Enter name",
+                    icon: const Icon(Icons.perm_contact_cal),
+                    errorText:
+                    _diaNameValidate ? 'Name cannot be empty' : null,
+                  ),
+                ),
+                Container(height: 10,),
+                TextField(
+                  onChanged: (value) {},
+                  controller: _textFieldContact,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 12,
+                  decoration: InputDecoration(
+                    hintText: "Enter contact",
+                    icon: const Icon(Icons.call),
+                    labelText: 'Contact',
+                    errorText:
+                    _diaContactValidate ? 'Contact cannot be empty' : null,
+                  ),
+                ),
+                Container(height: 10,),
+                TextField(
+                  onChanged: (value) {},
+                  controller: _textFieldAddress,
+                  keyboardType: TextInputType.streetAddress,
+                  decoration: InputDecoration(
+                    hintText: "Enter address",
+                    labelText: 'Address',
+                    icon: const Icon(Icons.home_work_outlined),
+                    errorText:
+                    _diaAddressValidate ? 'Address cannot be empty' : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.deepOrange),
+              ),
+              child: const Text('CANCEL'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_textFieldName.text.isEmpty ||
+                    !RegExp(r'^[a-z A-Z]+$').hasMatch(_textFieldName.text))
+                {
+                  setState(() => _diaNameValidate = true );
+                }
+                else
+                {
+                  setState(() => _diaNameValidate = false );
+                }
+                if (_textFieldContact.text.isEmpty ||
+                    !RegExp(r'^(\+\d{1,3}[- ]?)?\d{10}$')
+                        .hasMatch(_textFieldContact.text))
+                {
+                  setState(() => _diaContactValidate = true );
+                }
+                else
+                {
+                  setState(() => _diaContactValidate = false );
+                }
+                setState(() {
+                  _textFieldAddress.text.isEmpty
+                      ? _diaAddressValidate = true
+                      : _diaAddressValidate = false;
+                });
+                String name = _textFieldName.text;
+                String contact = _textFieldContact.text;
+                String address = _textFieldAddress.text;
+                _insertContact(currentUser, name, contact, address);
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+              ),
+              child: const Text('SAVE'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _getData3() async {
+    final allRows = await dbHelper.queryAllContact();
+    contacts.clear();
+    for (var row in allRows) {
+      contacts.add(Contact.fromMap(row));
+    }
+    // _showMessageInScaffold('Query done.');
+    setState(() {});
+  }
+  void _insertContact(user, name, contact, address) async {
+    // row to insert
+    Map<String, dynamic> row = {
+      DatabaseHelper.contactUser: user,
+      DatabaseHelper.contactName: name,
+      DatabaseHelper.contactContact: contact,
+      DatabaseHelper.contactAddress: address,
+    };
+    Contact contacts = Contact.fromMap(row);
+    final id = await dbHelper.insertContact(contacts);
+    debugPrint('inserted row id: $id \n');
+    debugPrint('Data Inserted :)');
+  }
+
+  void _deleteContact(id) async {
+    debugPrint('$id deleted');
+    await dbHelper.deleteContact(id);
+    // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
+  }
+}
+
+
