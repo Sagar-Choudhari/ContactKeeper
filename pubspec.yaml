@@ -14,7 +14,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   path:
   sqflite:
-  shared_preferences:
   flutter_session:
 
 dev_dependencies:

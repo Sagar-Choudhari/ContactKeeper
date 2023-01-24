@@ -1,9 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logreg/databasehelper/dbhelper.dart';
 import 'package:logreg/data_models/user.dart';
-
-import 'main.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({Key? key, required this.title}) : super(key: key);
@@ -30,7 +27,6 @@ class registerPageWidget extends StatefulWidget {
 }
 
 class _RegisterPageWidgetState extends State<registerPageWidget> {
-
   final dbHelper = DatabaseHelper.instance;
 
   final List<User> users = [];
@@ -52,6 +48,9 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
   bool _passwordValidate = false;
   bool _password2Validate = false;
 
+  bool showPassword = false;
+  bool showPassword2 = false;
+
   @override
   void dispose() {
     _ipName.dispose();
@@ -63,31 +62,39 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
     super.dispose();
   }
 
-  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+      GlobalKey<ScaffoldMessengerState>();
 
-  void _showMessageInScaffold(String message){
-    _scaffoldKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Text(message),
-      )
-    );
+  void _showMessageInScaffold(String message) {
+    _scaffoldKey.currentState?.showSnackBar(SnackBar(
+      content: Text(message),
+    ));
+  }
+
+  OnPasswordChanged(String password) {
+    setState(() {
+      _password2Validate = false;
+      if (password == _ipPassword2.text) {
+        _password2Validate = true;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(children: <Widget>[
           Padding(
-              padding: EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
               child: Column(
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipName,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Name',
                         hintText: 'Enter Your Name',
                         errorText:
@@ -96,11 +103,11 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipEmail,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Email',
                         hintText: 'Enter Your Email',
                         errorText:
@@ -109,11 +116,12 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipContact,
+                      maxLength: 12,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Contact',
                         hintText: 'Enter Your Contact',
                         errorText:
@@ -122,11 +130,11 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipCity,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'City',
                         hintText: 'Enter Your City',
                         errorText:
@@ -135,11 +143,11 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipAddress,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Address',
                         hintText: 'Enter Your Address',
                         errorText:
@@ -148,28 +156,58 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipPassword,
-                      obscureText: true,
+                      obscureText: !showPassword,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Password',
                         hintText: 'Enter Password',
-                        errorText: _passwordValidate ? 'Password cannot be empty' : null,
+                        errorText: _passwordValidate
+                            ? 'Password cannot be empty'
+                            : null,
+                        suffixIcon: InkWell(
+                          onTap: () {
+                            setState(() {
+                              showPassword = !showPassword;
+                            });
+                          },
+                          child: Icon(
+                              showPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: const Color(0xff0094ff)),
+                        ),
                       ),
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: TextField(
                       controller: _ipPassword2,
-                      obscureText: true,
+                      obscureText: !showPassword2,
+                      onChanged: (confirmPassword) =>
+                          OnPasswordChanged(_ipPassword2.text),
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Confirm Password',
                         hintText: 'Enter Password Again',
-                        errorText: _password2Validate ? 'Password cannot be empty' : null,
+                        errorText: _password2Validate
+                            ? 'Password cannot be empty'
+                            : null,
+                        suffixIcon: InkWell(
+                          onTap: () {
+                            setState(() {
+                              showPassword2 = !showPassword2;
+                            });
+                          },
+                          child: Icon(
+                              showPassword2
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: const Color(0xff0094ff)),
+                        ),
                       ),
                     ),
                   ),
@@ -180,48 +218,44 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                       minWidth: 343.0,
                       color: Theme.of(context).primaryColor,
                       textColor: Colors.white,
+                      splashColor: Colors.redAccent,
+                      child: const Text(
+                        "REGISTER",
+                        style: TextStyle(fontSize: 20),
+                      ),
                       onPressed: () {
                         if (_ipName.text.isEmpty ||
-                            !RegExp(r'^[a-z A-Z]+$').hasMatch(_ipName.text))
-                          {
-                            setState(() {
-                              _nameValidate = true;
-                            });
-                          }
-                        else
-                          {
-                            setState(() {
-                              _nameValidate = false;
-                            });
-                          }
+                            !RegExp(r'^[a-z A-Z]+$').hasMatch(_ipName.text)) {
+                          setState(() {
+                            _nameValidate = true;
+                          });
+                        } else {
+                          setState(() {
+                            _nameValidate = false;
+                          });
+                        }
                         if (_ipEmail.text.isEmpty ||
                             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                .hasMatch(_ipEmail.text))
-                          {
-                            setState(() {
-                              _emailValidate = true;
-                            });
-                          }
-                        else
-                          {
-                            setState(() {
-                              _emailValidate = false;
-                            });
-                          }
+                                .hasMatch(_ipEmail.text)) {
+                          setState(() {
+                            _emailValidate = true;
+                          });
+                        } else {
+                          setState(() {
+                            _emailValidate = false;
+                          });
+                        }
                         if (_ipContact.text.isEmpty ||
                             !RegExp(r'^(\+\d{1,3}[- ]?)?\d{10}$')
-                                .hasMatch(_ipContact.text))
-                          {
-                            setState(() {
-                              _contactValidate = true;
-                            });
-                          }
-                        else
-                          {
-                            setState(() {
-                              _contactValidate = false;
-                            });
-                          }
+                                .hasMatch(_ipContact.text)) {
+                          setState(() {
+                            _contactValidate = true;
+                          });
+                        } else {
+                          setState(() {
+                            _contactValidate = false;
+                          });
+                        }
                         setState(() {
                           _ipPassword.text.isEmpty
                               ? _passwordValidate = true
@@ -244,40 +278,71 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                         String password = _ipPassword.text;
                         String status = 'logged_out';
 
-                        if(_nameValidate && _emailValidate && _contactValidate && _cityValidate && _addressValidate && _passwordValidate && _password2Validate ){
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Filed can not be empty??'),
+                        if (_ipName.text.isEmpty ||
+                            _ipEmail.text.isEmpty ||
+                            _ipContact.text.isEmpty ||
+                            _ipCity.text.isEmpty ||
+                            _ipAddress.text.isEmpty ||
+                            _ipPassword.text.isEmpty ||
+                            _ipPassword2.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: const Text('Filed can not be empty??'),
+                            backgroundColor: Colors.deepOrangeAccent,
+                            action: SnackBarAction(
+                              label: 'OK!',
+                              onPressed: () {},
+                            ),
+                          ));
+                        } else {
+                          if (_nameValidate ||
+                              _emailValidate ||
+                              _contactValidate ||
+                              _passwordValidate ||
+                              _cityValidate ||
+                              _addressValidate ||
+                              _password2Validate) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: const Text('Please enter valid data!!'),
+                              backgroundColor: Colors.lime,
+                              action: SnackBarAction(
+                                label: 'OK!',
+                                onPressed: () {},
+                              ),
+                            ));
+                          } else {
+                            if (_ipPassword.text != _ipPassword2.text) {
+                              _passwordValidate = false;
+                              _password2Validate = false;
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                backgroundColor: Colors.redAccent,
+                                content: const Text('Password not matched!!'),
                                 action: SnackBarAction(
                                   label: 'OK!',
-                                  onPressed: () {
-                                    // Some code to undo the change.
-                                  },
+                                  onPressed: () {},
                                 ),
-                              )
-                          );
-                        }
-                        else {
-                          _insert(name, email, contact, city, address, password, status);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Registered Successfully :)'),
+                              ));
+                            } else {
+                              _insert(name, email, contact, city, address,
+                                  password, status);
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content:
+                                    const Text('Registered Successfully :)'),
+                                backgroundColor: Colors.green,
                                 action: SnackBarAction(
                                   label: 'OK!',
-                                  onPressed: () {
-                                    // Some code to undo the change.
-                                  },
+                                  onPressed: () {},
                                 ),
-                              )
-                          );
+                              ));
+                            }
+                          }
                         }
                       },
-                      splashColor: Colors.redAccent,
-                      child: const Text(
-                        "REGISTER",
-                        style: TextStyle(fontSize: 20),
-                      ),
                     ),
+                  ),
+                  Container(
+                    height: 12,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -286,28 +351,15 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
                       TextButton(
                         child: const Text(
                           'Sign-up',
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 20),
                         ),
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) {
-                            return MyApp();
-                          }));
+                          Navigator.of(context, rootNavigator: true)
+                              .pop(context);
                         },
                       )
                     ],
                   ),
-                  ElevatedButton(
-                      onPressed: (){
-                        setState(() {
-                          _getData();
-                        });
-                        print('getdata');
-                      },
-                      child:  const Text(
-                        'Get data',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                  )
                 ],
               )),
         ]));
@@ -329,16 +381,4 @@ class _RegisterPageWidgetState extends State<registerPageWidget> {
     _showMessageInScaffold('inserted row id: $id');
     debugPrint('Data Inserted :)');
   }
-
-  void _getData() async {
-    final allRows = await dbHelper.queryAllRows();
-    users.clear();
-    for (var row in allRows) {
-      users.add(User.fromMap(row));
-    }
-    _showMessageInScaffold('Query done.');
-    setState(() {});
-  }
-
-
 }

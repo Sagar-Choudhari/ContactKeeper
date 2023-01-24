@@ -1,12 +1,9 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logreg/data_models/user.dart';
 import 'package:logreg/databasehelper/dbhelper.dart';
 import 'package:logreg/main.dart';
-
-
 
 class UserRegister extends StatefulWidget {
   UserRegister({Key? key}) : super(key: key);
@@ -42,7 +39,6 @@ class _UserRegisterState extends State<UserRegister> {
     // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,24 +59,24 @@ class _UserRegisterState extends State<UserRegister> {
           child: _data == null
               ? const Center(child: CircularProgressIndicator())
               : Scrollbar(
-              isAlwaysShown: true, //always show scrollbar
-              thickness: 7, //width of scrollbar
-              radius: const Radius.circular(4), //corner radius of scrollbar
-              scrollbarOrientation: ScrollbarOrientation.left, //which side to show scrollbar
-              child: ListView.separated(
-                padding: const EdgeInsets.all(8),
-                itemCount: _data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return buildRow(index);
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Divider();
-                },
-              )
-          )
-      ),
+                  isAlwaysShown: true, //always show scrollbar
+                  thickness: 7, //width of scrollbar
+                  radius: const Radius.circular(4), //corner radius of scrollbar
+                  scrollbarOrientation:
+                      ScrollbarOrientation.left, //which side to show scrollbar
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return buildRow(index);
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return const Divider();
+                    },
+                  ))),
     );
   }
+
   Widget buildRow(int index) {
     final item = _data[index]['id'];
     return ListTile(
@@ -100,8 +96,7 @@ class _UserRegisterState extends State<UserRegister> {
             Icons.delete_forever,
             color: Colors.red,
             size: 26,
-          )
-      ),
+          )),
       selected: true,
       onTap: () {
         setState(() {
@@ -137,9 +132,8 @@ class _UserRegisterState extends State<UserRegister> {
         // return object of type Dialog
         return AlertDialog(
           title: const Text("Add Contact"),
-          shape: RoundedRectangleBorder(
-              borderRadius:
-              BorderRadius.circular(10.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           content: Container(
             width: 345,
             child: Column(
@@ -156,11 +150,12 @@ class _UserRegisterState extends State<UserRegister> {
                     labelText: 'Name',
                     hintText: "Enter name",
                     icon: const Icon(Icons.perm_contact_cal),
-                    errorText:
-                    _diaNameValidate ? 'Name cannot be empty' : null,
+                    errorText: _diaNameValidate ? 'Name cannot be empty' : null,
                   ),
                 ),
-                Container(height: 10,),
+                Container(
+                  height: 10,
+                ),
                 TextField(
                   onChanged: (value) {},
                   controller: _textFieldContact,
@@ -171,10 +166,12 @@ class _UserRegisterState extends State<UserRegister> {
                     icon: const Icon(Icons.call),
                     labelText: 'Contact',
                     errorText:
-                    _diaContactValidate ? 'Contact cannot be empty' : null,
+                        _diaContactValidate ? 'Contact cannot be empty' : null,
                   ),
                 ),
-                Container(height: 10,),
+                Container(
+                  height: 10,
+                ),
                 TextField(
                   onChanged: (value) {},
                   controller: _textFieldAddress,
@@ -184,7 +181,7 @@ class _UserRegisterState extends State<UserRegister> {
                     labelText: 'Address',
                     icon: const Icon(Icons.home_work_outlined),
                     errorText:
-                    _diaAddressValidate ? 'Address cannot be empty' : null,
+                        _diaAddressValidate ? 'Address cannot be empty' : null,
                   ),
                 ),
               ],
@@ -203,23 +200,17 @@ class _UserRegisterState extends State<UserRegister> {
             ElevatedButton(
               onPressed: () {
                 if (_textFieldName.text.isEmpty ||
-                    !RegExp(r'^[a-z A-Z]+$').hasMatch(_textFieldName.text))
-                {
-                  setState(() => _diaNameValidate = true );
-                }
-                else
-                {
-                  setState(() => _diaNameValidate = false );
+                    !RegExp(r'^[a-z A-Z]+$').hasMatch(_textFieldName.text)) {
+                  setState(() => _diaNameValidate = true);
+                } else {
+                  setState(() => _diaNameValidate = false);
                 }
                 if (_textFieldContact.text.isEmpty ||
                     !RegExp(r'^(\+\d{1,3}[- ]?)?\d{10}$')
-                        .hasMatch(_textFieldContact.text))
-                {
-                  setState(() => _diaContactValidate = true );
-                }
-                else
-                {
-                  setState(() => _diaContactValidate = false );
+                        .hasMatch(_textFieldContact.text)) {
+                  setState(() => _diaContactValidate = true);
+                } else {
+                  setState(() => _diaContactValidate = false);
                 }
                 setState(() {
                   _textFieldAddress.text.isEmpty

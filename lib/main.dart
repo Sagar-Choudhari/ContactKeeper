@@ -7,18 +7,16 @@ import 'package:logreg/databasehelper/dbhelper.dart';
 import 'package:logreg/register.dart';
 import 'package:logreg/home.dart';
 import 'package:logreg/userregister.dart';
-import 'dart:ui' as ui;
-import 'package:sqflite/sqflite.dart';
-
 
 final GlobalKey<ScaffoldMessengerState> scaffoldKey =
-GlobalKey<ScaffoldMessengerState>();
+    GlobalKey<ScaffoldMessengerState>();
 
 void main() {
   // RenderErrorBox.backgroundColor = Colors.transparent;
   // RenderErrorBox.textStyle = ui.TextStyle(color: Colors.transparent);
-  runApp(MyApp());
+  runApp(const MyApp());
 }
+
 class Value {
   static String value = '';
   static void setString(String newValue) {
@@ -33,7 +31,7 @@ class Value {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'LoggerAppVITPL';
+  static const String _title = 'Contact Keeper';
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +39,11 @@ class MyApp extends StatelessWidget {
       title: _title,
       scaffoldMessengerKey: scaffoldKey,
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/home': (context) => HomePage(),
+        '/login': (context) => const MyApp(),
+        '/register': (context) => const RegisterPage(title: 'Register'),
+      },
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -67,6 +70,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   bool _validateEmail = false;
   bool _validatePassword = false;
+
+  bool showPassword = false;
 
   final dbHelper = DatabaseHelper.instance;
   final List<User> users = [];
@@ -105,19 +110,31 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 labelText: 'Email',
-                errorText: _validateEmail ? 'Enter email & in proper format!' : null,
+                errorText:
+                    _validateEmail ? 'Enter email & in proper format!' : null,
               ),
             ),
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: TextField(
-              obscureText: true,
+              obscureText: !showPassword,
               controller: passwordController,
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 labelText: 'Password',
-                errorText: _validatePassword ? 'Password cannot be empty' : null,
+                errorText:
+                    _validatePassword ? 'Password cannot be empty' : null,
+                suffixIcon: InkWell(
+                  onTap: () {
+                    setState(() {
+                      showPassword = !showPassword;
+                    });
+                  },
+                  child: Icon(
+                      showPassword ? Icons.visibility : Icons.visibility_off,
+                      color: const Color(0xff0094ff)),
+                ),
               ),
             ),
           ),
@@ -155,14 +172,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ? _validatePassword = true
                         : _validatePassword = false;
                   });
-                  if(emailController.text.isEmpty && passwordController.text.isEmpty){
-                    _validateEmail = true;
-                    _validatePassword = true;
-                    debugPrint(emailController.text + '\n');
-                    debugPrint(passwordController.text);
-                  }
-                  else{
-                    if(await checkLogin(emailController.text,passwordController.text)){
+                  if (emailController.text.isEmpty ||
+                      passwordController.text.isEmpty) {
+                    _snackBar('Filed can not be empty!!');
+                  } else {
+                    if (await checkLogin(
+                        emailController.text, passwordController.text)) {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (_context) => HomePage()));
                       _snackBar('Login Success :)');
@@ -173,11 +188,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   }
 
                   setState(() {
-                    _isLoading=false;
+                    _isLoading = false;
                   });
                 },
-              )
-          ),
+              )),
           // Container(
           //   padding: const EdgeInsets.all(50),
           //   margin:const EdgeInsets.all(50) ,
@@ -209,18 +223,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ),
           TextButton(
             child: const Text(
-              'GO TO HOME',
-              style: TextStyle(fontSize: 15, color: Colors.indigo),
-            ),
-            onPressed: () async {
-              var checkSession = await FlutterSession().get('loggedUser');
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return HomePage();
-              }));
-            },
-          ),
-          TextButton(
-            child: const Text(
               'User REGISTER',
               style: TextStyle(fontSize: 15, color: Colors.indigo),
             ),
@@ -241,51 +243,32 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               }));
             },
           ),
-          Container(
-            height: 20,
-            child: Text(Value.getString()+' <- ID'),
-          ),
-          Container(
-            height: 20,
-            // child: Text('getSession'),
-          ),
         ],
       ),
     );
   }
 
-  Future<void> getSession() async {
-    var seas = await FlutterSession().get('loggedUser');
-    print(seas);
-  }
-
-
-
   _snackBar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(text),
-          action: SnackBarAction(
-            label: 'OK!',
-            onPressed: () {
-              // Some code to undo the change.
-            },
-          ),
-        )
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(text),
+      action: SnackBarAction(
+        label: 'OK!',
+        onPressed: () {
+          // Some code to undo the change.
+        },
+      ),
+    ));
   }
 
   Future<bool> checkLogin(String email, String password) async {
-
     var result = await dbHelper.login(email, password);
 
     // Text( '${users[index].email} - ${users[index].password}');
 
-    if(result){
+    if (result) {
       return true;
     } else {
       return false;
     }
   }
-
 }

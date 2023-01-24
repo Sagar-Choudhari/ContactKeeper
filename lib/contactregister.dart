@@ -1,14 +1,8 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:logreg/data_models/user.dart';
 import 'package:logreg/data_models/contact.dart';
 import 'package:logreg/databasehelper/dbhelper.dart';
 import 'package:logreg/main.dart';
-import 'package:flutter_session/flutter_session.dart';
-import 'package:sqflite/sqflite.dart';
-
 
 class ContactRegister extends StatefulWidget {
   ContactRegister({Key? key}) : super(key: key);
@@ -43,7 +37,6 @@ class _ContactRegisterState extends State<ContactRegister> {
     // _showMessageInScaffold('deleted $rowsDeleted row(s): row $id');
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,24 +54,23 @@ class _ContactRegisterState extends State<ContactRegister> {
           child: _data == null
               ? const Center(child: CircularProgressIndicator())
               : Scrollbar(
-              isAlwaysShown: true,
-              thickness: 7,
-              radius: const Radius.circular(4),
-              scrollbarOrientation: ScrollbarOrientation.left,
-              child: ListView.separated(
-                padding: const EdgeInsets.all(8),
-                itemCount: _data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return buildRow(index);
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Divider();
-                },
-              )
-          )
-      ),
+                  isAlwaysShown: true,
+                  thickness: 7,
+                  radius: const Radius.circular(4),
+                  scrollbarOrientation: ScrollbarOrientation.left,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return buildRow(index);
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return const Divider();
+                    },
+                  ))),
     );
   }
+
   Widget buildRow(int index) {
     final item = _data[index]['id'];
     return ListTile(
@@ -98,8 +90,7 @@ class _ContactRegisterState extends State<ContactRegister> {
             Icons.delete_forever,
             color: Colors.red,
             size: 26,
-          )
-      ),
+          )),
       selected: true,
       onTap: () {
         setState(() {

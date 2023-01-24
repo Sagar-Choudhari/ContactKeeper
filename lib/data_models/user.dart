@@ -10,7 +10,8 @@ class User {
   String? password;
   String? status;
 
-  User(this.id, this.name, this.email, this.contact, this.city, this.address, this.password, this.status);
+  User(this.id, this.name, this.email, this.contact, this.city, this.address,
+      this.password, this.status);
 
   User.fromMap(Map<String, dynamic> map) {
     id = map['id'];
@@ -27,10 +28,10 @@ class User {
     return {
       DatabaseHelper.columnId: id,
       DatabaseHelper.columnName: name,
-      DatabaseHelper.columnEmail : email,
-      DatabaseHelper.columnContact : contact,
-      DatabaseHelper.columnCity : city,
-      DatabaseHelper.columnAddress : address,
+      DatabaseHelper.columnEmail: email,
+      DatabaseHelper.columnContact: contact,
+      DatabaseHelper.columnCity: city,
+      DatabaseHelper.columnAddress: address,
       DatabaseHelper.columnPassword: password,
       DatabaseHelper.columnStatus: status,
     };

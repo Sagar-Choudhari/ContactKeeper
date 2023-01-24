@@ -4,9 +4,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_session/flutter_session.dart';
 
-
 class DatabaseHelper {
-
   static const _databaseName = "users.db";
   static const _databaseVersion = 1;
 
@@ -44,13 +42,12 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     return _database ??= await _initDatabase();
-}
+  }
 
-  _initDatabase() async{
+  _initDatabase() async {
     String path = join(await getDatabasesPath(), _databaseName);
     return await openDatabase(path,
-    version: _databaseVersion,
-    onCreate: _onCreate);
+        version: _databaseVersion, onCreate: _onCreate);
   }
 
   Future _onCreate(Database db, int version) async {
@@ -77,30 +74,27 @@ class DatabaseHelper {
           ''');
   }
 
-
   Future<int> insert(User users) async {
     Database db = await instance.database;
-    return await db.insert(table,
-        {
-          'name': users.name,
-          'email': users.email,
-          'contact': users.contact,
-          'city': users.city,
-          'address': users.address,
-          'password': users.password,
-          'status': users.status
-        });
+    return await db.insert(table, {
+      'name': users.name,
+      'email': users.email,
+      'contact': users.contact,
+      'city': users.city,
+      'address': users.address,
+      'password': users.password,
+      'status': users.status
+    });
   }
 
   Future<int> insertContact(Contact contacts) async {
     Database db = await instance.database;
-    return await db.insert(tableContact,
-        {
-          'user': contacts.user,
-          'name': contacts.name,
-          'contact': contacts.contact,
-          'address': contacts.address
-        });
+    return await db.insert(tableContact, {
+      'user': contacts.user,
+      'name': contacts.name,
+      'contact': contacts.contact,
+      'address': contacts.address
+    });
   }
 
   Future<List<Map<String, dynamic>>> queryAllRows() async {
@@ -116,7 +110,7 @@ class DatabaseHelper {
   Future<List<Map>> getOnlyMatchedContact(email) async {
     Database db = await instance.database;
     List<Map> maps = await db.query(tableContact,
-        columns: ['name', 'contact','address'],
+        columns: ['name', 'contact', 'address'],
         where: 'user = ?',
         whereArgs: [email]);
     return maps;
@@ -126,42 +120,35 @@ class DatabaseHelper {
     Database db = await instance.database;
 
     List<Map> maps = await db.query(table,
-        columns: ['name','email','contact','city','address','password'],
+        columns: ['name', 'email', 'contact', 'city', 'address', 'password'],
         where: 'email = ?',
         whereArgs: [email]);
     return maps;
   }
 
-  Future<bool> login(email,password) async {
+  Future<bool> login(email, password) async {
     Database db = await instance.database;
     // return await db.query(table, where: "$columnEmail LIKE '%$email%'");
 
     List<Map> maps = await db.query(table,
-        columns: ['email', 'password'],
-        where: 'email = ?',
-        whereArgs: [email]);
+        columns: ['email', 'password'], where: 'email = ?', whereArgs: [email]);
 
     if (maps.isNotEmpty && maps[0]['password'] == password) {
-      db.update(table, {'status': 'logged_in'}, where: 'email = ?', whereArgs: [email]);
-      await FlutterSession().set('loggedUser',email);
+      db.update(table, {'status': 'logged_in'},
+          where: 'email = ?', whereArgs: [email]);
+      await FlutterSession().set('loggedUser', email);
       return true;
     } else {
       return false;
     }
   }
 
-  _getData() async {
-    Database db = await openDatabase('users.db');
-    List<Map> _data = await db.query('users_table');
-    return;
-  }
-
   Future<bool> logout(String email) async {
-
     Database db = await instance.database;
 
-    int result = await db.update(table, {'status': 'logged_out'}, where: 'email = ?', whereArgs: [email]);
-    await FlutterSession().set('loggedUser',null);
+    int result = await db.update(table, {'status': 'logged_out'},
+        where: 'email = ?', whereArgs: [email]);
+    await FlutterSession().set('loggedUser', null);
     if (result > 0) {
       return true;
     } else {
@@ -171,13 +158,15 @@ class DatabaseHelper {
 
   Future<int?> queryRowCount() async {
     Database db = await instance.database;
-    return Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $table'));
+    return Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM $table'));
   }
 
   Future<int> update(User users) async {
     Database db = await instance.database;
     int id = users.toMap()['id'];
-    return await db.update(table, users.toMap(), where: '$columnId = ?', whereArgs: [id]);
+    return await db
+        .update(table, users.toMap(), where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<int> delete(int id) async {
@@ -187,9 +176,7 @@ class DatabaseHelper {
 
   Future<int> deleteContact(user) async {
     Database db = await instance.database;
-    return await db.delete(tableContact,
-        where: '$contactId = ?',
-        whereArgs: [user]
-    );
+    return await db
+        .delete(tableContact, where: '$contactId = ?', whereArgs: [user]);
   }
 }

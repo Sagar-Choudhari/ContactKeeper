@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logreg/data_models/user.dart';
 import 'package:logreg/data_models/contact.dart';
 import 'package:logreg/databasehelper/dbhelper.dart';
@@ -23,28 +21,29 @@ class _HomePageState extends State<HomePage> {
   static List<Map> _contacts = [];
 
   bool _isLoading = false;
-
-  // List<Map<String, dynamic>> _data =[];
+  var checkSession;
 
   var currentUser = Value.getString();
 
-  // getUser() async {
-  //   var loggedUser = await FlutterSession().get('loggedUser');
-  //   return loggedUser;
-  // }
-
   @override
   initState() {
+    super.initState();
+    if (currentUser == 'null') {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('LOGIN WITH CREDENTIAL!!'),
+        backgroundColor: Colors.redAccent,
+      ));
+    }
     dbHelper.database;
     _getData2(Value.getString());
     _getData(currentUser);
-    super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       debugPrint("WIDGET LOADED VRO == ${Value.getString()}");
       if (_data.isEmpty) {
-        debugPrint('LIST IS EMPTYYYYYYYY == ${Value.getString()}');
+        debugPrint('LIST IS EMPTYYYYYYYY');
       }
+      checkSession = await FlutterSession().get('loggedUser');
     });
   }
 
@@ -69,10 +68,18 @@ class _HomePageState extends State<HomePage> {
     return _data;
   }
 
-  Future<dynamic> _logout(email) async {
+  Future _logout(email) async {
     await dbHelper.logout(email);
+    debugPrint('Logged Out Function');
     Value.setString('null');
-    return true;
+
+    // Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+    // Navigator.pushReplacement<void, void>(
+    //   context,
+    //   MaterialPageRoute<void>(
+    //     builder: (BuildContext context) => const MyApp(),
+    //   ),
+    // );
   }
 
   Future _delete(id) async {
@@ -175,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     width: 15,
                   ),
-                  Text(_data[0]['password'] + Value.getString()),
+                  Text(_data[0]['password']),
                 ],
               ),
               onTap: () {},
@@ -191,28 +198,16 @@ class _HomePageState extends State<HomePage> {
                   const Text('Logout'),
                 ],
               ),
-              onTap: () async {
+              onTap: () {
+                _logout(checkSession);
 
-                var checkSession = await FlutterSession().get('loggedUser');
-                if (_logout(checkSession) == true) {
-                  debugPrint('LOGGED OUT');
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Logged Out :('),
-                    backgroundColor: Colors.orange,
-                  ));
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MyApp()),
-                  );
-                  Navigator.pop(context);
-
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Failed to Logout :)'),
-                    backgroundColor: Colors.green,
-                  ));
-                }
+                Navigator.of(context, rootNavigator: true).pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Logged Out :('),
+                  backgroundColor: Colors.red,
+                ));
+                debugPrint('LOGGED OUT');
+                Navigator.of(context).maybePop();
               },
             )
           ],
@@ -242,30 +237,32 @@ class _HomePageState extends State<HomePage> {
                                   elevation: 5,
                                   color: Colors.white70,
                                   child: ListTile(
-                                    leading: const Icon(Icons.perm_contact_calendar),
-                                    title: Text('${contacts['name']} + ${contacts['user']}'),
-                                    subtitle: Text(
-                                        "ID:${contacts['id']}, Con: ${contacts['contact']}, Add: ${contacts['address']}"),
-                                    trailing: IconButton(
-                                            onPressed: () {
-                                              // await dbHelper.deleteContact(contacts["id"]);
-                                              _delete(contacts['id']);
-                                              debugPrint("Data Deleted");
-                                              _getData(currentUser);
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(SnackBar(
-                                                  backgroundColor: Colors.blue,
-                                                  action: SnackBarAction(
-                                                    label: 'OK!',
-                                                    onPressed: () {},
-                                                  ),
-                                                  content: const Text("Contact Data Deleted")));
-                                              _getData(currentUser);
-                                            },
-                                            icon: const Icon(Icons.delete,
-                                                color: Colors.red))
-                                  )
-                              );
+                                      leading: const Icon(
+                                          Icons.perm_contact_calendar),
+                                      title: Text(
+                                          '${contacts['name']} + ${contacts['user']}'),
+                                      subtitle: Text(
+                                          "ID:${contacts['id']}, Con: ${contacts['contact']}, Add: ${contacts['address']}"),
+                                      trailing: IconButton(
+                                          onPressed: () {
+                                            // await dbHelper.deleteContact(contacts["id"]);
+                                            _delete(contacts['id']);
+                                            debugPrint("Data Deleted");
+                                            _getData(currentUser);
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    backgroundColor:
+                                                        Colors.blue,
+                                                    action: SnackBarAction(
+                                                      label: 'OK!',
+                                                      onPressed: () {},
+                                                    ),
+                                                    content: const Text(
+                                                        "Contact Data Deleted")));
+                                            _getData(currentUser);
+                                          },
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.red))));
                             }).toList(),
                           ),
                   ),
